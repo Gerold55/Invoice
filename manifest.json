@@ -1,11 +1,19 @@
 {
-  "name": "Turning Skies Safaris Invoice",
-  "short_name": "Safari Invoice",
-  "start_url": "/",
+  "background_color": "#ffffff",
+  "dir": "ltr",
   "display": "standalone",
-  "background_color": "#e8ece8",
+  "name": "Turning Skies Safaris",
+  "short_name": "Turning Skies",
+  "orientation": "any",
+  "scope": "/",
+  "start_url": "/",
   "theme_color": "#1f4a3a",
   "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
     {
       "src": "/logo.png",
       "sizes": "512x512",
