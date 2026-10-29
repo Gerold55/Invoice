@@ -19,7 +19,7 @@ else:
 
 CONFIG_PATH = os.path.join(BASE_DIR, "safari_config.json")
 
-# Initialize Flask and serve static files from the base directory (for logo.png)
+# Initialize Flask and serve static files from the base directory (for logo.png & manifest.json)
 app = Flask(__name__, static_folder=BASE_DIR, static_url_path="")
 app.secret_key = "turningskiessafaris_secure_secret_key"  # Encrypts user login session
 
@@ -66,6 +66,11 @@ def dashboard():
 def logout():
     session.clear()
     return redirect(url_for("login"))
+
+# --- EXPLICIT MANIFEST ROUTE FOR PWABUILDER ---
+@app.route('/manifest.json')
+def serve_manifest():
+    return app.send_static_file('manifest.json')
 
 @app.route("/api/config", methods=["GET"])
 def get_config():
