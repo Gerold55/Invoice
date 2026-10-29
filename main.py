@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import smtplib
 from email.mime.multipart import MIMEMultipart
@@ -8,7 +9,18 @@ from threading import Timer
 
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 
-app = Flask(__name__)
+# --- PATH CONFIGURATION (Supports PyInstaller .exe & standard Python) ---
+if getattr(sys, 'frozen', False):
+    # If running as a PyInstaller compiled .exe
+    BASE_DIR = sys._MEIPASS
+else:
+    # If running normally via python main.py
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+CONFIG_PATH = os.path.join(BASE_DIR, "safari_config.json")
+
+# Initialize Flask and serve static files from the base directory (for logo.png)
+app = Flask(__name__, static_folder=BASE_DIR, static_url_path="")
 app.secret_key = "turningskiessafaris_secure_secret_key"  # Encrypts user login session
 
 # --- CONFIGURATION ---
@@ -24,8 +36,6 @@ SMTP_USER = "your_email@gmail.com"
 SMTP_PASS = "your_email_app_password"
 
 # --- JSON CONFIGURATION LOADER ---
-CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "safari_config.json")
-
 def load_config():
     if os.path.exists(CONFIG_PATH):
         with open(CONFIG_PATH, "r", encoding="utf-8") as f:
@@ -87,7 +97,7 @@ def verify_pin():
         return jsonify({"success": False, "error": "Unauthorized"}), 401
     
     try:
-        data = request.json
+        data = request.json or {}
         entered_pin = data.get("pin", "")
         
         # Verify against Manager PIN or Admin Password
@@ -104,7 +114,7 @@ def send_email():
         return jsonify({"success": False, "error": "Unauthorized session."}), 401
     
     try:
-        data = request.json
+        data = request.json or {}
         inv_no = data.get("invNo", "INV-0001")
         co_name = data.get("coName", "Turning Skies Safaris Limited")
         client = data.get("client", "Client")
@@ -141,4 +151,6 @@ def open_browser():
     webbrowser.open("http://127.0.0.1:5000/")
 
 if __name__ == "__main__":
+    # Opens browser automatically when running locally
+    Timer(1, open_browser).start()
     app.run(host="0.0.0.0", port=5000, debug=False)
