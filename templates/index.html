@@ -231,7 +231,7 @@ var defaults={
  clTin:"",
  clVrn:"",
  efd:"",
- logo:"",
+ logo:"/logo.png",
  pay:"Bank: NMB\nAccount Name: Turning Skies Safaris Limited\nTZ Account no.: 42810019142\nUSD Account no.: 42810019143",
  invNo:"INV-0001",
  cur:"$",
@@ -281,6 +281,7 @@ fetch('/api/config')
             S.coTin = comp.tin;
             S.coVrn = comp.vrn;
             S.pay = comp.payment;
+            if(!S.logo) S.logo = "/logo.png";
 
             if(!S.issue) S.issue = today(0);
             if(!S.due) S.due = today(30);
@@ -309,7 +310,7 @@ function items(){
  S.items.forEach(function(it,i){
   if (it.custom) {
       h+='<div class="item" style="grid-template-columns: 2fr 1fr 30px 30px 30px 28px; gap:6px; margin-bottom:6px; align-items:center;">' +
-         '<input data-i="'+i+'" data-k="d" value="'+esc(it.d)+'" style="font-size:16px;" placeholder="Custom description (e.g., Airbnb stay)">' +
+         '<input data-i="'+i+'" data-k="d" value="'+esc(it.d)+'" style="font-size:16px;" placeholder="Custom description (e.g., Airbnb lodging)">' +
          '<input data-i="'+i+'" data-k="r" type="number" min="0" step="0.01" value="'+it.r+'" style="text-align:right; font-size:16px;" placeholder="Rate">' +
          '<input type="checkbox" data-i="'+i+'" data-k="pg"'+(it.pg?' checked':'')+' title="Multiply by guests">' +
          '<input type="checkbox" data-i="'+i+'" data-k="pn"'+(it.pn?' checked':'')+' title="Multiply by nights">' +
@@ -377,7 +378,9 @@ function render(){
  if(!S) return;
  $("pName").textContent=S.coName;$("pInfo").textContent=S.coInfo;
  var lg=$("pLogo"),th=$("logoThumb");
- if(S.logo){lg.src=th.src=S.logo;lg.style.display=th.style.display="block"}else{lg.removeAttribute("src");th.removeAttribute("src");lg.style.display=th.style.display="none"}
+ var logoUrl = S.logo || "/logo.png";
+ lg.src = th.src = logoUrl;
+ lg.style.display = th.style.display = "block";
  
  var gt=[];if(+S.guests>0)gt.push(S.guests+(+S.guests===1?" guest":" guests"));if(+S.nights>0)gt.push(S.nights+(+S.nights===1?" night":" nights"));$("pGuests").textContent=gt.join(", ");
  $("pNo").textContent=S.invNo;$("pIssue").textContent=fd(S.issue);$("pDue").textContent=fd(S.due);
