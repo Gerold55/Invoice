@@ -4,6 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Safari Invoice Maker</title>
+<link rel="manifest" href="/manifest.json">
+<script>
+  // Register service worker so PWABuilder detects it instantly
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW registration failed: ', err));
+    });
+  }
+</script>
 <style>
 :root{--bg:#e8ece8;--panel:#fff;--ink:#1c2b25;--mut:#5d6b64;--line:#d3dad5;--brand:#1f4a3a;--gold:#b98a2b;--paperink:#1c2b25;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
