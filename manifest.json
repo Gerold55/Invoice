@@ -2,22 +2,10 @@
   "background_color": "#ffffff",
   "dir": "ltr",
   "display": "standalone",
-  "name": "Turning Skies Safaris",
-  "short_name": "Turning Skies",
+  "name": "invoice-slp4.onrender",
   "orientation": "any",
   "scope": "/",
+  "short_name": "invoice-slp4.onrender",
   "start_url": "/",
-  "theme_color": "#1f4a3a",
-  "icons": [
-    {
-      "src": "/logo.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "/logo.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ]
+  "theme_color": "#ffffff"
 }
