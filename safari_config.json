@@ -1,0 +1,23 @@
+{
+  "company": {
+    "name": "",
+    "info": "Arusha, Tanzania\nPhone: +255 000 000 000\nEmail: support@turningskiessafaris.com\nWebsite: www.turningskiessafaris.com",
+    "tin": "203344414",
+    "vrn": "40-330954-B",
+    "payment": "Bank: NMB\nAccount Name: Turning Skies Safaris Limited\nTZ Account no.: 42810019142\nUSD Account no.: 42810019143"
+  },
+  "prices": {
+    "Safari Package (Full Board, per night)": 450.00,
+    "Serengeti National Park Conservation Fee": 70.00,
+    "Ngorongoro Crater Concession & Transit": 250.00,
+    "Tarangire National Park Fee": 60.00,
+    "Manyara Park Fee": 55.00
+  },
+  "addons": {
+    "Kilimanjaro Airport Transfer (One Way)": 50.00,
+    "Flying Doctor Emergency Evacuation Cover (Per Person)": 30.00,
+    "Camping Equipment Rental Set (Per Day)": 40.00,
+    "Exclusive Crater Service Fee": 295.00,
+    "Extra Lunch Box / Picnic": 20.00
+  }
+}

@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Safari Invoice Maker</title>
+<style>
+:root{--bg:#e8ece8;--panel:#fff;--ink:#1c2b25;--mut:#5d6b64;--line:#d3dad5;--brand:#1f4a3a;--gold:#b98a2b;--paperink:#1c2b25;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121a16;--panel:#1b2621;--ink:#e6ece8;--mut:#9aa8a0;--line:#2e3b35}}
+:root[data-theme="dark"]{--bg:#121a16;--panel:#1b2621;--ink:#e6ece8;--mut:#9aa8a0;--line:#2e3b35}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*:before,*:after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 "Public Sans",system-ui,sans-serif}
+.app{display:grid;grid-template-columns:minmax(340px,440px) 1fr;gap:20px;padding:20px;max-width:1280px;margin:0 auto}
+
+/* Mobile Tab Switcher */
+.mobile-nav{display:none; gap:8px; margin-bottom:12px}
+.mobile-nav button{flex:1; padding:12px; font-weight:600; font-size:14px; border:1px solid var(--line); background:var(--panel); color:var(--ink); border-radius:8px; cursor:pointer}
+.mobile-nav button.active{background:var(--brand); color:#fff; border-color:var(--brand)}
+
+@media(max-width:900px){
+    .mobile-nav{display:flex}
+    .app{grid-template-columns:1fr; padding:10px; gap:10px}
+    .paperWrap{display:none} /* Hidden by default on mobile until preview tab is clicked */
+    input,textarea,select{font-size:16px!important; padding:10px} /* Prevents iOS auto-zoom */
+    button{padding:12px 14px}
+}
+
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px}
+.panel h2{font:700 17px Fraunces,Georgia,serif;margin:0 0 10px}
+.panel section{padding:14px 0;border-top:1px solid var(--line)}
+.panel section:first-of-type{border-top:0;padding-top:0}
+label{display:block;font-size:13px;color:var(--mut);margin:8px 0 3px}
+input,textarea,select{width:100%;font:inherit;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:6px;padding:7px 9px}
+input:focus-visible,textarea:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button{font:inherit;font-weight:600;border:0;border-radius:6px;padding:9px 14px;cursor:pointer;background:var(--brand);color:#fff}
+button.alt{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.item{display:grid;grid-template-columns:2fr 1fr 30px 30px 30px 28px;gap:6px;margin-bottom:6px;align-items:center}
+.item input[type=checkbox]{width:20px;height:20px;padding:0;margin:0}
+.item button{padding:0;background:transparent;color:var(--mut);border:1px solid var(--line);height:32px}
+.logoPick{display:flex;align-items:center;gap:12px}
+.logoPick img{max-height:48px;max-width:120px;border:1px dashed var(--line);border-radius:6px;padding:4px;display:block}
+
+/* paper */
+.paperWrap{overflow-x:auto}
+.paper{background:#fff;color:#1c2b25;width:794px;max-width:100%;min-height:1000px;margin:0 auto;padding:48px 52px;border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.2);border-top:8px solid var(--brand)}
+.paper h1{font:700 34px Fraunces,Georgia,serif;margin:0;color:#1f4a3a}
+.head{display:flex;justify-content:space-between;gap:24px;align-items:flex-start}
+.brandBlock{display:flex;gap:14px;align-items:center}
+.brandBlock img{max-height:72px;max-width:170px;display:none}
+.co{font-size:13px;line-height:1.5;color:#44544c;white-space:pre-line}
+.co b{display:block;font:700 18px Fraunces,Georgia,serif;color:#1c2b25}
+.meta{text-align:right;font-size:13px}
+.meta div span{color:#6a7971;margin-right:8px}
+.bill{display:flex;justify-content:space-between;gap:24px;margin:30px 0 22px;padding:14px 0;border-top:2px solid #b98a2b;border-bottom:1px solid #d3dad5}
+.bill .k{font-size:12px;color:#6a7971;margin-bottom:2px}
+.bill p{margin:0;white-space:pre-line;font-size:14px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-weight:600;font-size:12px;color:#6a7971;padding:8px 6px;border-bottom:1px solid #1c2b25}
+td{padding:10px 6px;border-bottom:1px solid #e3e8e4;vertical-align:top}
+th.n,td.n{text-align:right;white-space:nowrap}
+.tot{margin:16px 0 0 auto;width:290px;font-size:14px}
+.tot div{display:flex;justify-content:space-between;padding:4px 6px}
+.tot .due{margin-top:6px;padding:10px 6px;border-top:2px solid #1f4a3a;font:700 18px Fraunces,Georgia,serif;color:#1f4a3a}
+.foot{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:36px;font-size:13px;color:#44544c}
+.foot h4{margin:0 0 4px;font-size:12px;color:#6a7971;font-weight:600}
+.foot p{margin:0;white-space:pre-line}
+.thanks{margin-top:36px;text-align:center;font:600 14px Fraunces,Georgia,serif;color:#1f4a3a}
+@media print{
+ @page{margin:0}
+ body{background:#fff}
+ .panel,.noprint,.mobile-nav{display:none!important}
+ .app{display:block;padding:0;max-width:none}
+ .paperWrap{overflow:visible; display:block!important}
+ .paper{box-shadow:none;width:100%;border-radius:0}
+ :root{padding:0}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- Mobile Tab Switcher (Visible only on mobile screens) -->
+<div class="mobile-nav noprint">
+    <button id="btnEditTab" class="active" onclick="setMobileView('edit')">✏️ Edit Details</button>
+    <button id="btnPrevTab" onclick="setMobileView('preview')">👁️ Preview Invoice</button>
+</div>
+
+<div class="panel noprint" id="editPanel">
+ <h2>Invoice details</h2>
+ 
+ <!-- LOCKED COMPANY INFORMATION SECTION -->
+ <section>
+  <label>Company logo</label>
+  <div class="logoPick"><img id="logoThumb" alt="Logo preview"></div>
+  
+  <label>Company name</label>
+  <input id="coName" readonly style="background-color: #f1f5f9; cursor: not-allowed; color: #475569;">
+  
+  <label>Address, phone, email, website</label>
+  <textarea id="coInfo" rows="4" readonly style="background-color: #f1f5f9; cursor: not-allowed; color: #475569;"></textarea>
+  
+  <div class="row">
+    <div><label>Your TIN</label><input id="coTin" readonly style="background-color: #f1f5f9; cursor: not-allowed; color: #475569;"></div>
+    <div><label>Your VRN</label><input id="coVrn" readonly style="background-color: #f1f5f9; cursor: not-allowed; color: #475569;"></div>
+  </div>
+ </section>
+
+ <section>
+  <div class="row"><div><label>Invoice number</label><input id="invNo"></div><div><label>Currency</label>
+   <select id="cur"><option>$</option><option>€</option><option>£</option><option>KSh </option><option>TSh </option><option>R </option><option>P </option><option>N$ </option></select></div></div>
+  <div class="row"><div><label>Issue date</label><input type="date" id="issue"></div><div><label>Due date</label><input type="date" id="due"></div></div>
+  <label>EFD receipt number (optional)</label><input id="efd">
+ </section>
+ <section>
+  <label>Bill to (guest or agent)</label><textarea id="client" rows="3"></textarea>
+  <div class="row"><div><label>Customer TIN (if any)</label><input id="clTin"></div><div><label>Customer VRN (if any)</label><input id="clVrn"></div></div>
+  <label id="lTrip">Trip or booking reference</label><input id="trip">
+  <div class="row"><div><label>Number of guests</label><input type="number" id="guests" min="1" step="1"></div><div><label>Number of nights</label><input type="number" id="nights" min="1" step="1"></div></div>
+ </section>
+
+ <section>
+  <label id="lItems">Line items (locked company rates)</label>
+  <div class="item" style="font-size:11px;color:var(--mut);margin-bottom:2px"><span>Description / Rate</span><span>Rate</span><span title="Multiply by guests">Gst</span><span title="Multiply by nights">Ngt</span><span title="VAT applies">VAT</span><span></span></div>
+  <div id="items"></div>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;">
+      <button class="alt" id="addItem">Add standard line</button>
+      <button class="alt" id="addCustomItem" style="border-color: var(--gold); color: var(--gold);" title="Add one-off custom line (e.g., Airbnb lodging)">Add Custom Line</button>
+  </div>
+ </section>
+
+ <!-- ADD-ONS SECTION -->
+ <section>
+  <label style="font-weight: bold; color: var(--brand);">Official Safari Add-ons</label>
+  <div style="display: flex; gap: 8px; margin-top: 6px;">
+   <select id="addonSelect" style="flex: 1; font-size: 12px;"></select>
+   <button class="alt" id="addAddonBtn" style="padding: 7px 12px; white-space: nowrap;">Add Option</button>
+  </div>
+  <div style="font-size: 11px; color: var(--mut); margin-top: 4px;">Select corporate add-ons to append them automatically.</div>
+ </section>
+
+ <section>
+  <div class="row"><div><label>VAT</label><select id="vat"><option value="18">18% (Mainland)</option><option value="15">15% (Zanzibar)</option><option value="0">0% (zero-rated)</option><option value="none">Not VAT registered</option></select></div><div><label>Prices entered are</label><select id="incl"><option value="ex">Excluding VAT</option><option value="in">Including VAT</option></select></div></div>
+  <label>Deposit paid</label><input type="number" id="dep" min="0" step="0.01">
+ </section>
+ <section>
+  <label>Payment details</label><textarea id="pay" rows="3" readonly style="background-color: #f1f5f9; cursor: not-allowed; color: #475569;"></textarea>
+  <label>Terms and notes</label><textarea id="notes" rows="3"></textarea>
+  <label>Closing line</label><input id="thanks">
+ </section>
+ <div class="bar">
+     <button id="print">Print or save as PDF</button>
+     <button class="alt" id="emailCo">Email to Company</button>
+     <button class="alt" id="newInv">New invoice</button>
+ </div>
+</div>
+
+<div class="paperWrap" id="previewWrap"><div class="paper" id="paper">
+ <div class="head">
+  <div class="brandBlock"><img id="pLogo" alt="Company logo"><div class="co"><b id="pName"></b><span id="pInfo"></span><span id="pIds"></span></div></div>
+  <div class="meta"><h1 id="pTitle">Tax Invoice</h1><div><span>No.</span><b id="pNo"></b></div><div><span>Issued</span><b id="pIssue"></b></div><div><span>Due</span><b id="pDue"></b></div><div id="pEfdRow" style="display:none"><span>EFD no.</span><b id="pEfd"></b></div></div>
+ </div>
+ <div class="bill"><div><div class="k">Billed to</div><p id="pClient"></p></div><div style="text-align:right"><div class="k">Booking</div><p id="pTrip"></p><p id="pGuests"></p></div></div>
+ <table><thead><tr><th>Description</th><th class="n">Guests</th><th class="n">Nights</th><th class="n">Rate</th><th class="n">Amount</th></tr></thead><tbody id="pRows"></tbody></table>
+ <div class="tot">
+  <div><span id="pSubL">Subtotal (excl. VAT)</span><span id="pSub"></span></div>
+  <div id="pTaxRow"><span id="pTaxL">VAT</span><span id="pTax"></span></div>
+  <div><span>Total</span><span id="pTotal"></span></div>
+  <div><span>Deposit paid</span><span id="pDep"></span></div>
+  <div class="due"><span>Balance due</span><span id="pBal"></span></div>
+ </div>
+ <div class="foot"><div><h4>Payment details</h4><p id="pPay"></p></div><div><h4>Terms and notes</h4><p id="pNotes"></p></div></div>
+ <div class="thanks" id="pThanks"></div>
+</div></div>
+
+</div>
+
+<script>
+// Mobile View Toggle Controller
+function setMobileView(view) {
+    var panel = document.getElementById('editPanel');
+    var preview = document.getElementById('previewWrap');
+    var btnEdit = document.getElementById('btnEditTab');
+    var btnPrev = document.getElementById('btnPrevTab');
+
+    if(view === 'edit') {
+        panel.style.display = 'block';
+        preview.style.display = 'none';
+        btnEdit.classList.add('active');
+        btnPrev.classList.remove('active');
+    } else {
+        panel.style.display = 'none';
+        preview.style.display = 'block';
+        btnPrev.classList.add('active');
+        btnEdit.classList.remove('active');
+    }
+}
+
+// Ensure proper desktop/mobile display state on window resize
+window.addEventListener('resize', function() {
+    if(window.innerWidth > 900) {
+        document.getElementById('editPanel').style.display = 'block';
+        document.getElementById('previewWrap').style.display = 'block';
+    } else {
+        if(document.getElementById('btnPrevTab').classList.contains('active')) {
+            document.getElementById('editPanel').style.display = 'none';
+            document.getElementById('previewWrap').style.display = 'block';
+        } else {
+            document.getElementById('editPanel').style.display = 'block';
+            document.getElementById('previewWrap').style.display = 'none';
+        }
+    }
+});
+
+(function(){
+var KEY="safariInvoiceV1";
+var $=function(id){return document.getElementById(id)};
+
+var defaults={
+ guests:2,
+ nights:7,
+ vat:"18",
+ incl:"ex",
+ coName:"Turning Skies Safaris Limited",
+ coInfo:"Arusha, Tanzania\nPhone: +255 000 000 000\nEmail: bookings@turningskiessafaris.com\nWebsite: www.turningskiessafaris.com",
+ coTin:"203344414",
+ coVrn:"40-330954-B",
+ clTin:"",
+ clVrn:"",
+ efd:"",
+ logo:"",
+ pay:"Bank: NMB\nAccount Name: Turning Skies Safaris Limited\nTZ Account no.: 42810019142\nUSD Account no.: 42810019143",
+ invNo:"INV-0001",
+ cur:"$",
+ issue:"",
+ due:"",
+ client:"Guest name\nAddress or email",
+ trip:"Serengeti 7-day private safari",
+ items:[
+  {d:"Safari Package (Full Board, per night)",r:450,pg:true,pn:true},
+  {d:"Serengeti National Park Conservation Fee",r:70,pg:true,pn:true}
+ ],
+ tax:0,
+ dep:1000,
+ notes:"Balance due 30 days before departure. Cancellations follow our booking terms.",
+ thanks:"Thank you for travelling with us. Karibu tena!"
+};
+
+var S;
+var LOCKED_PRICES = {};
+var LOCKED_ADDONS = {};
+
+function today(o){var d=new Date();d.setDate(d.getDate()+(o||0));return d.toISOString().slice(0,10)}
+function load(){try{var r=localStorage.getItem(KEY);if(r)return JSON.parse(r)}catch(e){}return null}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function clone(o){return JSON.parse(JSON.stringify(o))}
+
+// Fetch JSON configuration from Flask backend on startup & force override localStorage company data
+fetch('/api/config')
+    .then(res => res.json())
+    .then(data => {
+        if(data.success) {
+            var comp = data.config.company;
+            LOCKED_PRICES = data.config.prices || {};
+            LOCKED_ADDONS = data.config.addons || {};
+
+            defaults.coName = comp.name;
+            defaults.coInfo = comp.info;
+            defaults.coTin = comp.tin;
+            defaults.coVrn = comp.vrn;
+            defaults.pay = comp.payment;
+
+            S = load() || clone(defaults);
+
+            // Force override session state with locked configuration values
+            S.coName = comp.name;
+            S.coInfo = comp.info;
+            S.coTin = comp.tin;
+            S.coVrn = comp.vrn;
+            S.pay = comp.payment;
+
+            if(!S.issue) S.issue = today(0);
+            if(!S.due) S.due = today(30);
+
+            fill();
+            populateAddonsDropdown();
+            render();
+        }
+    })
+    .catch(err => {
+        console.error("Config load error, falling back to local defaults:", err);
+        S = load() || clone(defaults);
+        if(!S.issue) S.issue = today(0);
+        if(!S.due) S.due = today(30);
+        fill();
+        render();
+    });
+
+var fields=["guests","nights","vat","incl","coTin","coVrn","clTin","clVrn","efd","coName","coInfo","invNo","cur","issue","due","client","trip","pay","notes","thanks"];
+function fill(){fields.forEach(function(f){if($(f))$(f).value=S[f]});$("dep").value=S.dep;items();}
+function money(n){return S.cur+(Number(n)||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}
+function fd(s){if(!s)return"";var p=s.split("-");var d=new Date(p[0],p[1]-1,p[2]);return d.toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"})}
+
+function items(){
+ var h="";
+ S.items.forEach(function(it,i){
+  if (it.custom) {
+      h+='<div class="item" style="grid-template-columns: 2fr 1fr 30px 30px 30px 28px; gap:6px; margin-bottom:6px; align-items:center;">' +
+         '<input data-i="'+i+'" data-k="d" value="'+esc(it.d)+'" style="font-size:16px;" placeholder="Custom description (e.g., Airbnb stay)">' +
+         '<input data-i="'+i+'" data-k="r" type="number" min="0" step="0.01" value="'+it.r+'" style="text-align:right; font-size:16px;" placeholder="Rate">' +
+         '<input type="checkbox" data-i="'+i+'" data-k="pg"'+(it.pg?' checked':'')+' title="Multiply by guests">' +
+         '<input type="checkbox" data-i="'+i+'" data-k="pn"'+(it.pn?' checked':'')+' title="Multiply by nights">' +
+         '<input type="checkbox" data-i="'+i+'" data-k="v"'+(it.v===false?'':' checked')+' title="VAT applies">' +
+         '<button data-del="'+i+'" aria-label="Remove line">×</button>' +
+         '</div>';
+  } else {
+      var options="";
+      for (var desc in LOCKED_PRICES) {
+          var selected = (it.d === desc) ? "selected" : "";
+          options += '<option value="' + esc(desc) + '" ' + selected + '>' + esc(desc) + ' (' + S.cur + LOCKED_PRICES[desc] + ')</option>';
+      }
+      for (var addonName in LOCKED_ADDONS) {
+          var selected = (it.d === addonName) ? "selected" : "";
+          options += '<option value="' + esc(addonName) + '" ' + selected + '>' + esc(addonName) + ' (' + S.cur + LOCKED_ADDONS[addonName] + ')</option>';
+      }
+      if (!LOCKED_PRICES[it.d] && !LOCKED_ADDONS[it.d] && it.d) {
+          options += '<option value="' + esc(it.d) + '" selected>' + esc(it.d) + ' (' + S.cur + it.r + ')</option>';
+      }
+
+      h+='<div class="item">' +
+         '<select data-i="'+i+'" data-k="d" style="font-size:16px;">'+options+'</select>' +
+         '<input type="text" value="'+money(it.r)+'" readonly style="background-color:#f1f5f9; text-align:right; cursor:not-allowed;" title="Locked Rate">' +
+         '<input type="checkbox" data-i="'+i+'" data-k="pg"'+(it.pg?' checked':'')+' title="Multiply by guests">' +
+         '<input type="checkbox" data-i="'+i+'" data-k="pn"'+(it.pn?' checked':'')+' title="Multiply by nights">' +
+         '<input type="checkbox" data-i="'+i+'" data-k="v"'+(it.v===false?'':' checked')+' title="VAT applies">' +
+         '<button data-del="'+i+'" aria-label="Remove line">×</button>' +
+         '</div>';
+  }
+ });
+ $("items").innerHTML=h;
+}
+
+function populateAddonsDropdown() {
+    var select = $("addonSelect");
+    if(!select) return;
+    var html = "";
+    for (var addonName in LOCKED_ADDONS) {
+        html += '<option value="' + esc(addonName) + '">' + esc(addonName) + ' (' + S.cur + LOCKED_ADDONS[addonName] + ')</option>';
+    }
+    select.innerHTML = html;
+}
+
+$("addAddonBtn").addEventListener("click", function(){
+    var select = $("addonSelect");
+    if(!select) return;
+    var chosenAddon = select.value;
+    var addonPrice = LOCKED_ADDONS[chosenAddon] || 0;
+
+    S.items.push({
+        d: chosenAddon,
+        r: addonPrice,
+        pg: false,
+        pn: false,
+        v: true,
+        custom: false
+    });
+    items();
+    render();
+});
+
+function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;")}
+
+function render(){
+ if(!S) return;
+ $("pName").textContent=S.coName;$("pInfo").textContent=S.coInfo;
+ var lg=$("pLogo"),th=$("logoThumb");
+ if(S.logo){lg.src=th.src=S.logo;lg.style.display=th.style.display="block"}else{lg.removeAttribute("src");th.removeAttribute("src");lg.style.display=th.style.display="none"}
+ 
+ var gt=[];if(+S.guests>0)gt.push(S.guests+(+S.guests===1?" guest":" guests"));if(+S.nights>0)gt.push(S.nights+(+S.nights===1?" night":" nights"));$("pGuests").textContent=gt.join(", ");
+ $("pNo").textContent=S.invNo;$("pIssue").textContent=fd(S.issue);$("pDue").textContent=fd(S.due);
+ var cids=[];if(S.clTin)cids.push("TIN: "+S.clTin);if(S.clVrn)cids.push("VRN: "+S.clVrn);$("pClient").textContent=S.client+(cids.length?"\n"+cids.join("   "):"");var ids=[];if(S.coTin)ids.push("TIN: "+S.coTin);if(S.coVrn)ids.push("VRN: "+S.coVrn);$("pIds").textContent=ids.length?"\n"+ids.join("   "):"";$("pEfdRow").style.display=S.efd?"":"none";$("pEfd").textContent=S.efd;$("pTrip").textContent=S.trip;
+ var sub=0,tb=0,rows="";
+ S.items.forEach(function(it){var g=+S.guests||0,ng=+S.nights||0,a=(+it.r||0)*(it.pg?g:1)*(it.pn?ng:1);sub+=a;if(it.v!==false)tb+=a;rows+="<tr><td>"+esc(it.d)+'</td><td class="n">'+(it.pg?g:"–")+'</td><td class="n">'+(it.pn?ng:"–")+'</td><td class="n">'+money(it.r)+'</td><td class="n">'+money(a)+"</td></tr>"});
+ $("pRows").innerHTML=rows;
+ var nv=S.vat==="none",rt=nv?0:(+S.vat||0),inc=S.incl==="in",tx=inc?tb*rt/(100+rt):tb*rt/100,tot=inc?sub:sub+tx,bal=tot-(+S.dep||0);
+ $("pSub").textContent=money(tot-tx);$("pSubL").textContent=nv?"Subtotal":"Subtotal (excl. VAT)";$("pTaxL").textContent="VAT ("+rt+"%)";$("pTax").textContent=money(tx);
+ $("pTaxRow").style.display=nv?"none":"";$("pTotal").textContent=money(tot);$("pTitle").textContent=nv?"Invoice":"Tax Invoice";
+ $("pDep").textContent="−"+money(S.dep);$("pBal").textContent=money(bal);
+ $("pPay").textContent=S.pay;$("pNotes").textContent=S.notes;$("pThanks").textContent=S.thanks;
+ document.title=S.invNo+" – "+S.coName;save();
+}
+
+fields.forEach(function(f){if($(f))$(f).addEventListener("input",function(){
+    if(["coName","coInfo","coTin","coVrn","pay"].includes(f)) return;
+    S[f]=$(f).value;render()
+})});
+
+$("dep").addEventListener("input",function(){S.dep=$("dep").value;render()});
+
+$("items").addEventListener("change",function(e){
+ var t=e.target,i=t.getAttribute("data-i");if(i===null)return;
+ var k=t.getAttribute("data-k");
+ if(k==="d") {
+     var chosen = t.value;
+     S.items[i].d = chosen;
+     if (!S.items[i].custom) {
+         S.items[i].r = LOCKED_PRICES[chosen] || LOCKED_ADDONS[chosen] || 0;
+     }
+ } else if(k==="v" || k==="pg" || k === "pn") {
+     S.items[i][k] = t.checked;
+ }
+ items();render();
+});
+
+$("items").addEventListener("input",function(e){
+ var t=e.target,i=t.getAttribute("data-i");if(i===null)return;
+ var k=t.getAttribute("data-k");
+ if(k==="d") {
+     S.items[i].d = t.value;
+     render();
+ } else if(k==="r") {
+     S.items[i].r = parseFloat(t.value) || 0;
+     render();
+ }
+});
+
+$("items").addEventListener("click",function(e){var i=e.target.getAttribute("data-del");if(i===null)return;S.items.splice(i,1);items();render()});
+
+$("addItem").addEventListener("click",function(){
+    var firstKey = Object.keys(LOCKED_PRICES)[0] || "";
+    S.items.push({d:firstKey, r:LOCKED_PRICES[firstKey]||0, pg:true, pn:true, v:true, custom:false});
+    items();render();
+});
+
+$("addCustomItem").addEventListener("click", function(){
+    S.items.push({d: "", r: 0, pg: false, pn: false, v: true, custom: true});
+    items();
+    render();
+});
+
+$("print").addEventListener("click",function(){window.print()});
+
+// --- EMAIL TO COMPANY HANDLER ---
+$("emailCo").addEventListener("click", function(){
+    var btn = $("emailCo"), oText = btn.textContent;
+    btn.textContent = "Sending...";
+    
+    var payload = {
+        invNo: S.invNo,
+        coName: S.coName,
+        client: S.client
+    };
+
+    fetch('/api/send-email', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success) {
+            btn.textContent = "Sent to Company!";
+            setTimeout(() => btn.textContent = oText, 2500);
+        } else {
+            alert("Failed to send email: " + (data.error || "Unknown error"));
+            btn.textContent = oText;
+        }
+    })
+    .catch(err => {
+        alert("Server connection error.");
+        btn.textContent = oText;
+    });
+});
+
+$("newInv").addEventListener("click",function(){
+ var m=/^(.*?)(\d+)$/.exec(S.invNo||""),next=m?m[1]+String(+m[2]+1).padStart(m[2].length,"0"):"INV-0001";
+ S.invNo=next;S.issue=today(0);S.due=today(30);S.client=defaults.client;S.trip="";S.items=[{d:Object.keys(LOCKED_PRICES)[0]||"",r:450,pg:true,pn:true,v:true,custom:false}];S.dep=0;fill();render()});
+
+})();
+</script>
+</body>
+</html>
